@@ -1,5 +1,9 @@
 # hubsub
 
+![CI](https://github.com/gebv/hubsub/workflows/CI/badge.svg?branch=master)
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/gebv/hubsub)](https://pkg.go.dev/github.com/gebv/hubsub)
+[![Go Report Card](https://goreportcard.com/badge/github.com/gebv/hubsub)](https://goreportcard.com/report/github.com/gebv/hubsub)
+
 Low-level tool for managing subscriptions.
 
 Popular of use:
