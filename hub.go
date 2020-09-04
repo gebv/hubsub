@@ -39,19 +39,18 @@ func (h *Hub) Publish(in string, filterFn func(meta map[string]string) bool) err
 
 func (h *Hub) findMatchedSubs(fn func(meta map[string]string) bool) (subIDs []uint) {
 	h.rw.Lock()
-	defer h.rw.Unlock()
-
 	for subID, sub := range h.subs {
 		if fn(sub.meta) {
 			subIDs = append(subIDs, subID)
 		}
 	}
+	h.rw.Unlock()
 
 	return
 }
 
 func (h *Hub) publish(in string, subIDs ...uint) error {
-	if in == "" || len(subIDs) == 0 {
+	if in == "" {
 		return errors.New("interrupted publication - invalid input args")
 	}
 
@@ -88,16 +87,18 @@ func (h *Hub) Subscribe(meta map[string]string) (uint, <-chan Message) {
 	ch := make(chan Message, DefaultBufferCap)
 
 	h.rw.Lock()
-	defer h.rw.Unlock()
 
 	h.lastSubID++
 
 	subID := h.lastSubID
+
 	sub := &subscribe{
 		ch:   ch,
 		meta: meta,
 	}
 	h.subs[subID] = sub
+
+	h.rw.Unlock()
 
 	return subID, ch
 }
@@ -105,7 +106,6 @@ func (h *Hub) Subscribe(meta map[string]string) (uint, <-chan Message) {
 // Unsubscribe unsubscribe for specified sub IDs.
 func (h *Hub) Unsubscribe(subIDs ...uint) {
 	h.rw.Lock()
-	defer h.rw.Unlock()
 
 	for _, subID := range subIDs {
 		sub, ok := h.subs[subID]
@@ -115,6 +115,8 @@ func (h *Hub) Unsubscribe(subIDs ...uint) {
 			continue
 		}
 	}
+
+	h.rw.Unlock()
 }
 
 // Message this is the message container.

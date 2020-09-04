@@ -85,11 +85,23 @@ func Test_Successful(t *testing.T) {
 }
 
 func Benchmark_SubscriberAndOneMatcher(b *testing.B) {
+	rower := func(ch <-chan Message) {
+		for {
+			_, ok := <-ch
+			if !ok {
+				return
+			}
+			if cap(ch) > DefaultBufferCap {
+				panic("cap(ch) > DefaultBufferCap")
+			}
+		}
+	}
 	b.Run("1", func(b *testing.B) {
 		h := NewHub()
 		for i := 0; i < 1; i++ {
 			meta := MapFromPairs("client", fmt.Sprint(i+1))
-			h.Subscribe(meta)
+			_, ch := h.Subscribe(meta)
+			go rower(ch)
 		}
 
 		filter := FilterFromPairs("client", "1")
@@ -105,7 +117,8 @@ func Benchmark_SubscriberAndOneMatcher(b *testing.B) {
 		h := NewHub()
 		for i := 0; i < 10; i++ {
 			meta := MapFromPairs("client", fmt.Sprint(i+1))
-			h.Subscribe(meta)
+			_, ch := h.Subscribe(meta)
+			go rower(ch)
 		}
 
 		filter := FilterFromPairs("client", "1")
@@ -121,7 +134,8 @@ func Benchmark_SubscriberAndOneMatcher(b *testing.B) {
 		h := NewHub()
 		for i := 0; i < 10; i++ {
 			meta := MapFromPairs("client", fmt.Sprint(i+1))
-			h.Subscribe(meta)
+			_, ch := h.Subscribe(meta)
+			go rower(ch)
 		}
 
 		filter := FilterFromPairs("client", "5")
@@ -137,7 +151,8 @@ func Benchmark_SubscriberAndOneMatcher(b *testing.B) {
 		h := NewHub()
 		for i := 0; i < 100; i++ {
 			meta := MapFromPairs("client", fmt.Sprint(i+1))
-			h.Subscribe(meta)
+			_, ch := h.Subscribe(meta)
+			go rower(ch)
 		}
 
 		filter := FilterFromPairs("client", "1")
@@ -153,7 +168,8 @@ func Benchmark_SubscriberAndOneMatcher(b *testing.B) {
 		h := NewHub()
 		for i := 0; i < 100; i++ {
 			meta := MapFromPairs("client", fmt.Sprint(i+1))
-			h.Subscribe(meta)
+			_, ch := h.Subscribe(meta)
+			go rower(ch)
 		}
 
 		filter := FilterFromPairs("client", "50")
@@ -169,7 +185,8 @@ func Benchmark_SubscriberAndOneMatcher(b *testing.B) {
 		h := NewHub()
 		for i := 0; i < 1000; i++ {
 			meta := MapFromPairs("client", fmt.Sprint(i+1))
-			h.Subscribe(meta)
+			_, ch := h.Subscribe(meta)
+			go rower(ch)
 		}
 
 		filter := FilterFromPairs("client", "1")
@@ -185,7 +202,8 @@ func Benchmark_SubscriberAndOneMatcher(b *testing.B) {
 		h := NewHub()
 		for i := 0; i < 1000; i++ {
 			meta := MapFromPairs("client", fmt.Sprint(i+1))
-			h.Subscribe(meta)
+			_, ch := h.Subscribe(meta)
+			go rower(ch)
 		}
 
 		filter := FilterFromPairs("client", "500")
