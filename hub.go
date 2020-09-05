@@ -34,42 +34,31 @@ func (h *Hub) Publish(in string, filterFn func(meta map[string]string) bool) err
 		return errors.New("interrupted publication - invalid input args")
 	}
 
-	return h.publish(in, h.findMatchedSubs(filterFn)...)
+	return h.publish(in, filterFn)
 }
 
-func (h *Hub) findMatchedSubs(fn func(meta map[string]string) bool) (subIDs []uint) {
-	h.rw.Lock()
-	for subID, sub := range h.subs {
-		if fn(sub.meta) {
-			subIDs = append(subIDs, subID)
-		}
-	}
-	h.rw.Unlock()
-
-	return
-}
-
-func (h *Hub) publish(in string, subIDs ...uint) error {
+func (h *Hub) publish(in string, matcherFn func(meta map[string]string) bool) error {
 	if in == "" {
 		return errors.New("interrupted publication - invalid input args")
 	}
 
 	h.rw.RLock()
 
-	// Sending message into subs
-	var toUnsubscribe []uint
-	for _, subID := range subIDs {
-		if sub, ok := h.subs[subID]; ok {
-			if sub == nil {
-				toUnsubscribe = append(toUnsubscribe, subID)
-				continue
-			}
-			select {
-			case sub.ch <- in:
-			default:
-				// Sub can't keep up. Will be closed.
-				toUnsubscribe = append(toUnsubscribe, subID)
-			}
+	// Sending message if matched
+	var toUnsubscribe []uint // TODO: get slice from pool?
+	for subID, sub := range h.subs {
+		if sub == nil {
+			toUnsubscribe = append(toUnsubscribe, subID)
+			continue
+		}
+		if !matcherFn(sub.meta) {
+			continue
+		}
+		select {
+		case sub.ch <- in:
+		default:
+			// Sub can't keep up. Will be closed.
+			toUnsubscribe = append(toUnsubscribe, subID)
 		}
 	}
 
