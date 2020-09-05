@@ -96,6 +96,11 @@ func Benchmark_SubscriberAndOneMatcher(b *testing.B) {
 			}
 		}
 	}
+	filterClient := func(clientID string) func(in map[string]string) bool {
+		return func(in map[string]string) bool {
+			return in["client"] == clientID
+		}
+	}
 	b.Run("1", func(b *testing.B) {
 		h := NewHub()
 		for i := 0; i < 1; i++ {
@@ -104,7 +109,7 @@ func Benchmark_SubscriberAndOneMatcher(b *testing.B) {
 			go rower(ch)
 		}
 
-		filter := FilterFromPairs("client", "1")
+		filter := filterClient("1")
 
 		b.ReportAllocs()
 		b.ResetTimer()
@@ -121,7 +126,7 @@ func Benchmark_SubscriberAndOneMatcher(b *testing.B) {
 			go rower(ch)
 		}
 
-		filter := FilterFromPairs("client", "1")
+		filter := filterClient("1")
 
 		b.ReportAllocs()
 		b.ResetTimer()
@@ -138,7 +143,7 @@ func Benchmark_SubscriberAndOneMatcher(b *testing.B) {
 			go rower(ch)
 		}
 
-		filter := FilterFromPairs("client", "5")
+		filter := filterClient("5")
 
 		b.ReportAllocs()
 		b.ResetTimer()
@@ -155,7 +160,7 @@ func Benchmark_SubscriberAndOneMatcher(b *testing.B) {
 			go rower(ch)
 		}
 
-		filter := FilterFromPairs("client", "1")
+		filter := filterClient("1")
 
 		b.ReportAllocs()
 		b.ResetTimer()
@@ -172,7 +177,7 @@ func Benchmark_SubscriberAndOneMatcher(b *testing.B) {
 			go rower(ch)
 		}
 
-		filter := FilterFromPairs("client", "50")
+		filter := filterClient("50")
 
 		b.ReportAllocs()
 		b.ResetTimer()
@@ -189,7 +194,7 @@ func Benchmark_SubscriberAndOneMatcher(b *testing.B) {
 			go rower(ch)
 		}
 
-		filter := FilterFromPairs("client", "1")
+		filter := filterClient("1")
 
 		b.ReportAllocs()
 		b.ResetTimer()
@@ -206,7 +211,7 @@ func Benchmark_SubscriberAndOneMatcher(b *testing.B) {
 			go rower(ch)
 		}
 
-		filter := FilterFromPairs("client", "500")
+		filter := filterClient("500")
 
 		b.ReportAllocs()
 		b.ResetTimer()
